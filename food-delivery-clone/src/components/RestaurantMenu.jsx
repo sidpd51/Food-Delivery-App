@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react"
-import { RES_MENU } from "../utilities/content"
+import { MENU_API } from "../utilities/content"
 import { useParams } from "react-router-dom"
+import DishCard from "./DishCard";
+import Shimmer from "./Shimmer"
 
 const RestaurantMenu = () => {
-    const [resId] = useParams()
+    const { resId } = useParams()
     const[resMenu, setResMenu] = useState(null)
+    const[resFilteredMenu, setResFilteredMenu] = useState(null)
 
 
     useEffect(()=> {
@@ -12,19 +15,31 @@ const RestaurantMenu = () => {
     },[])
 
     const fetchMenu = async () => {
-        const response = await fetch(RES_MENU)
+        const response = await fetch(MENU_API+resId)
         const data = await response.json()
-        console.log(data)
+        // console.log(data?.data)
+        setResMenu(data?.data)
+        // setResFilteredMenu(data?.data)
     }
 
-    return (
-        <h1>restaurant menu page</h1>
-    )
+    const itemCards = resMenu?.cards?.[5]?.groupedCard?.cardGroupMap?.REGULAR?.cards?.[1]?.card?.card?.itemCards
+
+
+    if(!itemCards) return <Shimmer/>
+
+    console.log(itemCards)
+
+    return (<>
+        <div className="w-3/4 mx-auto">
+        { 
+            itemCards.map((item)=>{
+                return <DishCard key={item.card.info.id} itemInfo = {item.card.info}></DishCard>
+            })
+        }
+        </div>
+    </>)
 }
 
 export default RestaurantMenu
 
-// https://www.swiggy.com/restaurants/pizza-hut-city-gold-complex-navrangpura-ahmedabad-47589??
-// https://www.swiggy.com/restaurants/chinese-wok-mouje-chagispur-cg-road-ahmedabad-636894/?restaurant_id=636894
-
-// https://www.swiggy.com/restaurants/chinese-wok-mouje-chagispur-cg-road-ahmedabad-636894
+// itemInfo = {item.card.info}
